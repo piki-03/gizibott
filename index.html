@@ -25,15 +25,16 @@
 
 <div class="container mt-3">
 
-    <!-- PROFILE -->
-    <div class="card-pro d-flex align-items-center profile">
-        <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">
-        <div class="ms-3">
-            <b>Vicky</b><br>
-            <small>4 Tahun • Jakarta</small><br>
-            <small class="text-muted">UID: 123ABC456</small>
-        </div>
+ <!-- PROFILE -->
+<div class="card-pro d-flex align-items-center profile">
+    <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">
+    <div class="ms-3">
+        <b>Nama Anak</b><br>
+        <small>Umur • Kota</small><br>
+        <small class="ortu">Orang Tua</small><br>
+        <small class="text-muted">UID: -</small>
     </div>
+</div>
 
     <!-- HEIGHT -->
   <div class="card-pro height-box">
@@ -49,30 +50,27 @@
 </div>
 
     <!-- MENU GIZI -->
-    <div class="card-pro">
-        <b class="mb-2 d-block">🍽️ Pilih Program Gizi</b>
+ <!-- MENU GIZI -->
+<div class="card-pro">
+    <b class="mb-2 d-block">🍽️ Pilih Program Gizi</b>
 
-        <div class="row g-3 mt-1">
-            
-         <div class="col-6">
-    <div class="menu-btn gizi-a" onclick="kirimGizi('A', event)">
-        <i class="bi bi-egg-fried fs-3"></i>
-        <div>Gizi A</div>
-        <small>Standar</small>
-    </div>
-</div>
+    <div class="row g-3 mt-1">
 
-<div class="col-6">
-    <div class="menu-btn gizi-b" onclick="kirimGizi('B', event)">
-        <i class="bi bi-capsule fs-3"></i>
-        <div>Gizi B</div>
-        <small>Intensif</small>
-    </div>
-</div>
-
+        <div class="col-6 text-center">
+            <div class="menu-btn gizi-a" onclick="kirimGizi('A', event)">
+                Gizi A
+            </div>
+            <small>Standar</small>
         </div>
-    </div>
 
+        <div class="col-6 text-center">
+            <div class="menu-btn gizi-b" onclick="kirimGizi('B', event)">
+                Gizi B
+            </div>
+            <small>Intensif</small>
+        </div>
+
+    </div>
 </div>
 
 <div class="safe"></div>
@@ -89,6 +87,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- JS -->
 <script src="script.js"></script>
 
