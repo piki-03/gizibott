@@ -23,6 +23,44 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
 .nav-item:hover { color: #6FCF97; transform: scale(1.1); }
 .nav-item.active { color: #6FCF97; }
 .safe { height: 80px; }
+
+.dropdown-download {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-download {
+    padding: 10px 15px;
+    background: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.menu-hidden {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.menu-hidden button {
+    display: block;
+    width: 150px;
+    padding: 10px;
+    border: none;
+    background: white;
+    cursor: pointer;
+    text-align: left;
+}
+
+.menu-hidden button:hover {
+    background: #f0f0f0;
+}
 </style>
 </head>
 
@@ -58,11 +96,16 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
                 </thead>
                 <tbody id="tableData"></tbody>
             </table>
-            <div class="d-flex justify-content-end mt-3">
-                <button class="btn btn-success px-4 py-2 shadow-sm" onclick="downloadPDF()">
-                    <i class="bi bi-file-earmark-pdf"></i> Download PDF
-                </button>
-            </div>
+           <div class="dropdown-download">
+    <button onclick="toggleMenu()" class="btn-download">
+        ⬇️ Download
+    </button>
+
+    <div id="menuDownload" class="menu-hidden">
+        <button onclick="downloadPDF()">📄  PDF</button>
+        <button onclick="downloadExcel()">📊  Excel</button>
+    </div>
+</div>
         </div>
     </div>
 
@@ -151,6 +194,11 @@ document.getElementById("search").addEventListener("keyup", function(){
 // NAV
 function goHome(){ window.location.href = "index.html"; }
 
+function toggleMenu() {
+    const menu = document.getElementById("menuDownload");
+    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+}
+
 // PDF
 function downloadPDF(){
     const element = document.querySelector(".table-responsive");
@@ -164,6 +212,18 @@ function downloadPDF(){
     };
 
     html2pdf().set(opt).from(element).save();
+}
+
+function downloadExcel(){
+    let table = document.querySelector(".table-responsive table");
+    let html = table.outerHTML;
+
+    let url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+    let link = document.createElement("a");
+
+    link.href = url;
+    link.download = "history-gizi.xls";
+    link.click();
 }
 
 // fetch history saat load
