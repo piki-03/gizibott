@@ -1,9 +1,14 @@
 const SUPABASE_URL = "https://unipgrkundayjaudznjn.supabase.co";
 const SUPABASE_KEY = "sb_publishable_oV3aBukpqULi2fhILB8BpQ_h09lm8bQ";
 
-// ================= AMBIL UID TERBARU =================
-function ambilUIDTerbaru(){
-    fetch(`${SUPABASE_URL}/rest/v1/log_rfid?select=uid&order=created_at.desc&limit=1`, {
+// ================= STATE =================
+let lastScanTime = Date.now();
+let currentUID = null;
+let lastRFID_ID = null;
+
+// ================= AMBIL DATA SCAN TERBARU =================
+function ambilScanTerbaru(){
+    fetch(`${SUPABASE_URL}/rest/v1/hasil_scan?select=id,uid,tinggi&order=created_at.desc&limit=1`, {
         headers: {
             "apikey": SUPABASE_KEY,
             "Authorization": "Bearer " + SUPABASE_KEY
@@ -11,12 +16,27 @@ function ambilUIDTerbaru(){
     })
     .then(res => res.json())
     .then(data => {
+
         if(data.length > 0){
-            let uid = data[0].uid;
-            ambilDataAnak(uid);
-            ambilTinggi(uid);
+
+            let scan = data[0];
+
+            // 🔥 ANTI LOOP
+            if(scan.id !== lastRFID_ID){
+
+                lastRFID_ID = scan.id;
+                currentUID = scan.uid;
+                lastScanTime = Date.now();
+
+                console.log("Scan baru:", scan);
+
+                ambilDataAnak(scan.uid);
+                updateTinggi(scan.tinggi); // 🔥 langsung dari sini
+            }
         }
-    });
+
+    })
+    .catch(err => console.error("Error ambilScan:", err));
 }
 
 // ================= DATA ANAK =================
@@ -31,7 +51,7 @@ function ambilDataAnak(uid){
     .then(data => {
 
         if(data.length === 0){
-            alert("Data anak tidak ditemukan");
+            console.log("Data anak tidak ditemukan");
             return;
         }
 
@@ -47,33 +67,15 @@ function ambilDataAnak(uid){
 
         document.querySelector(".profile .text-muted").innerText =
             "UID: " + anak.uid;
-    });
+    })
+    .catch(err => console.error("Error ambilDataAnak:", err));
 }
 
 // ================= HITUNG UMUR =================
 function hitungUmur(tanggal){
     let lahir = new Date(tanggal);
     let sekarang = new Date();
-
-    let umur = sekarang.getFullYear() - lahir.getFullYear();
-    return umur;
-}
-
-// ================= AMBIL TINGGI =================
-function ambilTinggi(uid){
-    fetch(`${SUPABASE_URL}/rest/v1/tinggi_badan?uid=eq.${uid}&order=created_at.desc&limit=1`, {
-        headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": "Bearer " + SUPABASE_KEY
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.length > 0){
-            let tinggi = data[0].tinggi;
-            updateTinggi(tinggi);
-        }
-    });
+    return sekarang.getFullYear() - lahir.getFullYear();
 }
 
 // ================= UPDATE TINGGI =================
@@ -100,10 +102,35 @@ function updateTinggi(tinggi){
     }
 }
 
-// ================= AUTO REFRESH =================
+// ================= RESET UI =================
+function resetUI(){
+
+    document.getElementById("tinggi").innerHTML = "0 cm";
+    document.getElementById("bar").style.width = "0%";
+
+    document.querySelector(".profile b").innerText = "Menunggu scan...";
+    document.querySelector(".profile small").innerText = "-";
+    document.querySelector(".profile .ortu").innerText = "-";
+    document.querySelector(".profile .text-muted").innerText = "UID: -";
+
+    currentUID = null;
+}
+
+// ================= POLLING =================
 setInterval(() => {
-    ambilUIDTerbaru();
-}, 3000);
+    ambilScanTerbaru();
+}, 2000);
+
+// ================= AUTO RESET =================
+setInterval(() => {
+
+    let sekarang = Date.now();
+
+    if(sekarang - lastScanTime > 5000){
+        resetUI();
+    }
+
+}, 1000);
 
 // ================= CHART =================
 let data = [80, 95, 105, 115, 120];
