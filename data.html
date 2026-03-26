@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Data Anak</title>
 
-<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Icon -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
@@ -24,49 +21,80 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
 .nav-item.active { color: #6FCF97; }
 .safe { height: 80px; }
 
+/* 🔥 DOWNLOAD BUTTON MODERN */
+.download-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
 .dropdown-download {
     position: relative;
-    display: inline-block;
 }
 
 .btn-download {
-    padding: 10px 15px;
-    background: #28a745;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #28a745, #20c997);
     color: white;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 25px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: 0.3s;
 }
 
-.menu-hidden {
-    display: none;
+.btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+
+/* DROPDOWN MODERN */
+.menu-dropdown {
     position: absolute;
+    right: 0;
+    top: 110%;
     background: white;
-    border: 1px solid #ccc;
-    margin-top: 5px;
-    border-radius: 5px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     overflow: hidden;
+    min-width: 180px;
+
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: all 0.25s ease;
 }
 
-.menu-hidden button {
-    display: block;
-    width: 150px;
-    padding: 10px;
+.menu-dropdown.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.menu-dropdown button {
+    width: 100%;
+    padding: 12px 15px;
     border: none;
     background: white;
-    cursor: pointer;
     text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
 }
 
-.menu-hidden button:hover {
-    background: #f0f0f0;
+.menu-dropdown button:hover {
+    background: #f5f5f5;
+    padding-left: 20px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <h5><i class="bi bi-bar-chart"></i> Data Monitoring Anak</h5>
     <small>Riwayat Pengukuran Tinggi Badan & Gizi</small>
@@ -74,12 +102,10 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
 
 <div class="container mt-3">
 
-    <!-- SEARCH -->
     <div class="card-pro">
         <input type="text" id="search" class="form-control search-box" placeholder="🔍 Cari nama anak...">
     </div>
 
-    <!-- TABLE -->
     <div class="card-pro">
         <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle text-center">
@@ -96,16 +122,25 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
                 </thead>
                 <tbody id="tableData"></tbody>
             </table>
-           <div class="dropdown-download">
-    <button onclick="toggleMenu()" class="btn-download">
-        ⬇️ Download
-    </button>
 
-    <div id="menuDownload" class="menu-hidden">
-        <button onclick="downloadPDF()">📄  PDF</button>
-        <button onclick="downloadExcel()">📊  Excel</button>
-    </div>
-</div>
+            <!-- 🔥 DOWNLOAD BUTTON (KANAN + SVG) -->
+            <div class="download-wrapper">
+                <div class="dropdown-download">
+                    <button onclick="toggleMenu()" class="btn-download">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 24 24">
+                            <path d="M12 16l4-5h-3V4h-2v7H8l4 5z"/>
+                            <path d="M20 18H4v2h16v-2z"/>
+                        </svg>
+                        Download
+                    </button>
+
+                    <div id="menuDownload" class="menu-dropdown">
+                        <button onclick="downloadPDF()">📄 Download PDF</button>
+                        <button onclick="downloadExcel()">📊 Download Excel</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -113,7 +148,6 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
 
 <div class="safe"></div>
 
-<!-- NAV -->
 <div class="bottom-nav py-2">
     <div class="d-flex justify-content-around">
         <div class="nav-item" onclick="goHome()">
@@ -127,19 +161,17 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <script>
-// ================= SUPABASE =================
 const SUPABASE_URL = "https://unipgrkundayjaudznjn.supabase.co";
 const SUPABASE_KEY = "sb_publishable_oV3aBukpqULi2fhILB8BpQ_h09lm8bQ";
 
-// ================= HITUNG UMUR =================
 function hitungUmur(tanggal){
     let lahir = new Date(tanggal);
     let sekarang = new Date();
     return sekarang.getFullYear() - lahir.getFullYear();
 }
 
-// ================= FETCH HISTORY =================
 async function fetchHistory(){
     try{
         const res = await fetch(
@@ -153,27 +185,19 @@ async function fetchHistory(){
         );
 
         const data = await res.json();
-
         let table = document.getElementById("tableData");
         table.innerHTML = "";
 
         data.forEach((d,i)=>{
-            let anak = d.anak?.[0];
-
-            let nama = anak ? anak.nama : d.nama;
-            let tgl = anak ? anak.tanggal_lahir : "-";
-            let umur = anak ? hitungUmur(anak.tanggal_lahir) + " Tahun" : "-";
-            let gizi = d.tombol_a ? "Gizi A" : "Gizi B";
-
             table.innerHTML += `
 <tr>
-    <td>${i+1}</td>
-    <td>${d.nama}</td>
-    <td>${d.tanggal_lahir || '-'}</td>
-    <td>${d.umur ? d.umur + ' Tahun' : '-'}</td>
-    <td>${d.tinggi} cm</td>
-    <td>${d.tombol_a ? 'Gizi A' : 'Gizi B'}</td>
-    <td>${new Date(d.created_at).toLocaleString()}</td>
+<td>${i+1}</td>
+<td>${d.nama}</td>
+<td>${d.tanggal_lahir || '-'}</td>
+<td>${d.umur ? d.umur + ' Tahun' : '-'}</td>
+<td>${d.tinggi} cm</td>
+<td>${d.tombol_a ? 'Gizi A' : 'Gizi B'}</td>
+<td>${new Date(d.created_at).toLocaleString()}</td>
 </tr>`;
         });
 
@@ -182,7 +206,6 @@ async function fetchHistory(){
     }
 }
 
-// SEARCH
 document.getElementById("search").addEventListener("keyup", function(){
     let keyword = this.value.toLowerCase();
     let rows = document.querySelectorAll("#tableData tr");
@@ -191,15 +214,21 @@ document.getElementById("search").addEventListener("keyup", function(){
     });
 });
 
-// NAV
 function goHome(){ window.location.href = "index.html"; }
 
+// 🔥 TOGGLE MODERN
 function toggleMenu() {
     const menu = document.getElementById("menuDownload");
-    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    menu.classList.toggle("show");
 }
 
-// PDF
+// AUTO CLOSE
+window.addEventListener("click", function(e) {
+    if (!e.target.closest(".dropdown-download")) {
+        document.getElementById("menuDownload").classList.remove("show");
+    }
+});
+
 function downloadPDF(){
     const element = document.querySelector(".table-responsive");
 
@@ -226,9 +255,7 @@ function downloadExcel(){
     link.click();
 }
 
-// fetch history saat load
 fetchHistory();
-
 </script>
 </body>
 </html>
