@@ -111,13 +111,16 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
             <table class="table table-bordered table-hover align-middle text-center">
                 <thead>
                     <tr>
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Tgl Lahir</th>
-                        <th>Umur</th>
-                        <th>Tinggi Badan</th>
-                        <th>Button Dipilih</th>
-                        <th>Waktu</th>
+                        <tr>
+    <th>No</th>
+    <th>Nama</th>
+    <th>Tgl Lahir</th>
+    <th>Umur</th>
+    <th>Tinggi Badan</th>
+    <th>Button Dipilih</th>
+    <th>Waktu</th>
+    <th>Nama Ortu</th>
+</tr>
                     </tr>
                 </thead>
                 <tbody id="tableData"></tbody>
@@ -185,33 +188,55 @@ async function fetchHistory(){
         );
 
         const data = await res.json();
-        let table = document.getElementById("tableData");
-        table.innerHTML = "";
+        // simpan semua data untuk search
+        window.historyData = data;
 
-        data.forEach((d,i)=>{
-            table.innerHTML += `
-<tr>
-<td>${i+1}</td>
-<td>${d.nama}</td>
-<td>${d.tanggal_lahir || '-'}</td>
-<td>${d.umur ? d.umur + ' Tahun' : '-'}</td>
-<td>${d.tinggi} cm</td>
-<td>${d.tombol_a ? 'Gizi A' : 'Gizi B'}</td>
-<td>${new Date(d.created_at).toLocaleString()}</td>
-</tr>`;
-        });
+        // tampilkan 20 data pertama di tabel
+        renderTable(data.slice(0, 20));
 
     } catch(err){
         console.error("Error fetch history:", err);
     }
 }
 
+// render table dari data yang diberikan
+function renderTable(data){
+    let table = document.getElementById("tableData");
+    table.innerHTML = "";
+
+    data.forEach((d,i)=>{
+        const tglLahir = d.anak?.tanggal_lahir || '-';
+        const umur = tglLahir !== '-' ? hitungUmur(tglLahir) : '-';
+
+        table.innerHTML += `
+<tr>
+<td>${i+1}</td>
+<td>${d.anak?.nama || '-'}</td>
+<td>${tglLahir}</td>
+<td>${umur !== '-' ? umur + ' Tahun' : '-'}</td>
+<td>${d.tinggi || '-'} cm</td>
+<td>${d.tombol_a ? 'Gizi A' : 'Gizi B'}</td>
+<td>${new Date(d.created_at).toLocaleString()}</td>
+<td>${d.anak?.nama_ortu || '-'}</td>
+</tr>`;
+    });
+}
+
+// search
 document.getElementById("search").addEventListener("keyup", function(){
     let keyword = this.value.toLowerCase();
-    let rows = document.querySelectorAll("#tableData tr");
-    rows.forEach(row=>{
-        row.style.display = row.innerText.toLowerCase().includes(keyword) ? "" : "none";
+
+    let filtered = window.historyData.filter(d=>{
+        const nama = d.anak?.nama?.toLowerCase() || '';
+        const tgl = d.anak?.tanggal_lahir?.toLowerCase() || '';
+        const ortu = d.anak?.nama_ortu?.toLowerCase() || '';
+        const umur = d.anak?.tanggal_lahir ? hitungUmur(d.anak.tanggal_lahir).toString() : '';
+
+        return nama.includes(keyword) || tgl.includes(keyword) || ortu.includes(keyword) || umur.includes(keyword);
     });
+
+    // tampilkan maksimal 20 hasil search
+    renderTable(filtered.slice(0, 20));
 });
 
 function goHome(){ window.location.href = "index.html"; }
