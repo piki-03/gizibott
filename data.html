@@ -111,7 +111,6 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
             <table class="table table-bordered table-hover align-middle text-center">
                 <thead>
                     <tr>
-                        <tr>
     <th>No</th>
     <th>Nama</th>
     <th>Tgl Lahir</th>
@@ -119,8 +118,8 @@ body { background: #F6FAF8; font-family: 'Segoe UI', sans-serif; }
     <th>Tinggi Badan</th>
     <th>Button Dipilih</th>
     <th>Waktu</th>
-    <th>Nama Ortu</th>
-</tr>
+    <th>Aksi</th>
+
                     </tr>
                 </thead>
                 <tbody id="tableData"></tbody>
@@ -217,9 +216,38 @@ function renderTable(data){
 <td>${d.tinggi || '-'} cm</td>
 <td>${d.tombol_a ? 'Gizi A' : 'Gizi B'}</td>
 <td>${new Date(d.created_at).toLocaleString()}</td>
-<td>${d.anak?.nama_ortu || '-'}</td>
+<td>
+    <button class="btn btn-sm btn-danger" onclick="hapusData('${d.id}')">
+        <i class="bi bi-trash"></i> Hapus
+    </button>
+</td>
 </tr>`;
     });
+}
+
+async function hapusData(id){
+    if(!confirm("Apakah kamu yakin ingin menghapus data ini?")) return;
+
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/history_gizi?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if(res.ok){
+            alert("Data berhasil dihapus!");
+            fetchHistory(); // refresh tabel
+        } else {
+            alert("Gagal menghapus data.");
+            console.error(await res.text());
+        }
+    } catch(err){
+        console.error("Error hapus data:", err);
+    }
 }
 
 // search
@@ -229,7 +257,6 @@ document.getElementById("search").addEventListener("keyup", function(){
     let filtered = window.historyData.filter(d=>{
         const nama = d.anak?.nama?.toLowerCase() || '';
         const tgl = d.anak?.tanggal_lahir?.toLowerCase() || '';
-        const ortu = d.anak?.nama_ortu?.toLowerCase() || '';
         const umur = d.anak?.tanggal_lahir ? hitungUmur(d.anak.tanggal_lahir).toString() : '';
 
         return nama.includes(keyword) || tgl.includes(keyword) || ortu.includes(keyword) || umur.includes(keyword);
