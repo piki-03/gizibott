@@ -56,19 +56,25 @@
 
     <div class="row g-3 mt-1">
 
-        <div class="col-6 text-center">
-            <div class="menu-btn gizi-a" onclick="kirimGizi('A', event)">
-                Gizi A
-            </div>
-            <small>Standar</small>
-        </div>
+   <button class="menu-btn gizi-a"
+  onmousedown="tekanA(this)" 
+  onmouseup="lepasA(this)" 
+  onmouseleave="lepasA(this)"
+  ontouchstart="tekanA(this)" 
+  ontouchend="lepasA(this)"
+  ontouchcancel="lepasA(this)">
+  Gizi A
+</button>
 
-        <div class="col-6 text-center">
-            <div class="menu-btn gizi-b" onclick="kirimGizi('B', event)">
-                Gizi B
-            </div>
-            <small>Intensif</small>
-        </div>
+<button class="menu-btn gizi-b"
+  onmousedown="tekanB(this)" 
+  onmouseup="lepasB(this)" 
+  onmouseleave="lepasB(this)"
+  ontouchstart="tekanB(this)" 
+  ontouchend="lepasB(this)"
+  ontouchcancel="lepasB(this)">
+  Gizi B
+</button>
 
     </div>
 </div>
@@ -90,6 +96,20 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- JS -->
 <script src="script.js"></script>
+
+<script>
+document.addEventListener("mouseup", () => {
+    if(typeof kirimKeServer === "function"){
+        kirimKeServer(0,0);
+    }
+});
+
+document.addEventListener("touchend", () => {
+    if(typeof kirimKeServer === "function"){
+        kirimKeServer(0,0);
+    }
+});
+</script>
 
 </body>
 </html>

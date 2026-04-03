@@ -1,0 +1,46 @@
+-- TABEL DATA ANAK
+create table anak (
+    uid text primary key,
+    nama text,
+    tanggal_lahir date,
+    tempat_lahir text,
+    nama_ortu text
+);
+
+-- TABEL LOG PEMBACAAN RFID (SIMULASI TAP KARTU)
+create table log_rfid (
+    id bigint generated always as identity primary key,
+    uid text,
+    created_at timestamp default now()
+);
+
+-- TABEL DATA SENSOR TINGGI BADAN
+create table tinggi_badan (
+    id bigint generated always as identity primary key,
+    uid text,
+    tinggi integer,
+    created_at timestamp default now()
+);
+
+create table hasil_scan (
+    id bigint generated always as identity primary key,
+    uid text,
+    tinggi integer,
+    created_at timestamp default now()
+);
+
+create table history_gizi (
+    id serial primary key,
+    uid_anak text,
+    nama text,
+    tinggi int not null,
+    tombol_a int default 0,
+    tombol_b int default 0,
+    created_at timestamptz default now(),
+
+    constraint fk_anak foreign key (uid_anak) references anak(uid)
+);
+
+
+
+

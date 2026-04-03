@@ -112,37 +112,107 @@ function goTodata(){
     window.location.href = "data.html"; 
 }
 
-// ================= KIRIM GIZI =================
-async function kirimGizi(mode, event){
+// // ================= KIRIM GIZI =================
+// async function kirimGizi(mode, event){
 
-    // tombol aktif
-    document.querySelectorAll(".menu-btn").forEach(btn => btn.classList.remove("active"));
-    event.currentTarget.classList.add("active");
+//     // tombol aktif
+//     document.querySelectorAll(".menu-btn").forEach(btn => btn.classList.remove("active"));
+//     event.currentTarget.classList.add("active");
+
+//     let nama = document.querySelector(".profile b").innerText;
+//     let tinggi = parseInt(document.getElementById("tinggi").innerText) || 0;
+
+//     if(nama === "Menunggu scan..." || tinggi <= 0){
+//         alert("Data belum siap!");
+//         return;
+//     }
+
+//     // ✅ ambil dari memory (tidak fetch lagi)
+//     let tanggal_lahir = currentAnak?.tanggal_lahir || null;
+//     let umur = tanggal_lahir ? hitungUmur(tanggal_lahir) : null;
+
+//     let payload = {
+//         uid_anak: currentUID,
+//         nama: nama,
+//         tinggi: tinggi,
+//         tanggal_lahir: tanggal_lahir,
+//         umur: umur,
+//         tombol_a: (mode === "A") ? 1 : 0,
+//         tombol_b: (mode === "B") ? 1 : 0
+//     };
+
+//     try{
+//         const res = await fetch(`${SUPABASE_URL}/rest/v1/history_gizi`, {
+//             method: "POST",
+//             headers: {
+//                 "apikey": SUPABASE_KEY,
+//                 "Authorization": "Bearer " + SUPABASE_KEY,
+//                 "Content-Type": "application/json"
+//             },
+//             body: JSON.stringify([payload])
+//         });
+
+//         const data = await res.json();
+//         console.log("Data tersimpan:", data);
+
+//     } catch(err){
+//         console.error("Error simpan history_gizi:", err);
+//     }
+// }
+
+// ================= PUSH BUTTON REAL =================
+
+function tekanA(el){
+    el.classList.add("active");
+    kirimKeServer(1, 0);
+}
+
+function lepasA(el){
+    el.classList.remove("active");
+    kirimKeServer(0, 0);
+}
+
+function tekanB(el){
+    el.classList.add("active");
+    kirimKeServer(0, 1);
+}
+
+function lepasB(el){
+    el.classList.remove("active");
+    kirimKeServer(0, 0);
+}
+
+// KIRIM KE SUPABASE (1 nilai saja)
+let lastA = 0;
+let lastB = 0;
+
+async function kirimKeServer(a, b){
+
+    // cegah spam
+    if(a === lastA && b === lastB) return;
+    lastA = a;
+    lastB = b;
 
     let nama = document.querySelector(".profile b").innerText;
-    let tinggi = parseInt(document.getElementById("tinggi").innerText) || 0;
+    let tinggiText = document.getElementById("tinggi").innerText;
+    let tinggi = parseInt(tinggiText.replace(/[^\d]/g, "")) || 0;
 
-    if(nama === "Menunggu scan..." || tinggi <= 0){
-        alert("Data belum siap!");
+    if(nama === "Menunggu scan..." || tinggi <= 0 || !currentUID){
+        console.log("Data belum siap");
         return;
     }
 
-    // ✅ ambil dari memory (tidak fetch lagi)
-    let tanggal_lahir = currentAnak?.tanggal_lahir || null;
-    let umur = tanggal_lahir ? hitungUmur(tanggal_lahir) : null;
-
     let payload = {
-        uid_anak: currentUID,
-        nama: nama,
-        tinggi: tinggi,
-        tanggal_lahir: tanggal_lahir,
-        umur: umur,
-        tombol_a: (mode === "A") ? 1 : 0,
-        tombol_b: (mode === "B") ? 1 : 0
-    };
+    uid_anak: currentUID,
+    nama: nama,
+    tinggi: tinggi,
+    tombol_a: a,
+    tombol_b: b,
+    waktu: new Date().toISOString()
+}
 
     try{
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/history_gizi`, {
+        await fetch(`${SUPABASE_URL}/rest/v1/history_gizi`, {
             method: "POST",
             headers: {
                 "apikey": SUPABASE_KEY,
@@ -152,13 +222,13 @@ async function kirimGizi(mode, event){
             body: JSON.stringify([payload])
         });
 
-        const data = await res.json();
-        console.log("Data tersimpan:", data);
+        console.log("Kirim:", payload);
 
     } catch(err){
-        console.error("Error simpan history_gizi:", err);
+        console.error("Error kirim:", err);
     }
 }
+
 
 // ================= DOWNLOAD PDF =================
 function downloadPDF(){

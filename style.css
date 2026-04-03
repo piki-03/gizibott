@@ -31,6 +31,16 @@ body {
     transform: translateY(-3px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.08);
 }
+/* WRAPPER MENU */
+.card-pro .row {
+    display: flex;
+}
+
+/* KOLOM TOMBOL */
+.card-pro .col-6 {
+    display: flex;
+    align-items: stretch;}
+
 
 /* PROFILE */
 .profile img {
@@ -96,14 +106,21 @@ body {
 
 /* MENU BUTTON */
 .menu-btn {
+    width: 100%;
     background: white;
     border-radius: 18px;
     padding: 15px;
     text-align: center;
     box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    transition: 0.3s;
+    transition: all 0.15s ease;
     cursor: pointer;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
 }
+
 
 .menu-btn:hover {
     transform: translateY(-5px);
@@ -111,10 +128,23 @@ body {
 }
 
 .menu-btn.active {
-    background: linear-gradient(135deg, #00C853, #69F0AE) !important;
+    background: linear-gradient(135deg, #00C853, #00E676) !important;
     color: white;
     transform: scale(0.95);
-    box-shadow: 0 5px 20px rgba(0,200,83,0.4);
+    box-shadow: 0 0 15px rgba(0,200,83,0.6);
+    transform: scale(0.0.95);
+    box-shadow: 0 0 20px rgba(0,200,83,0.7);
+}
+
+/* efek klik cepat */
+.menu-btn.clicked {
+    animation: clickAnim 0.2s;
+}
+
+@keyframes clickAnim {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+    100% { transform: scale(1); }
 }
 
 /* WARNA */
