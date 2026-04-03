@@ -9,6 +9,7 @@ let currentAnak = null;
 let lastA = 0;
 let lastB = 0;
 let lastSendTime = 0;
+let isSending = false; // 🔥 tambahan
 
 // ================= FETCH TIMEOUT =================
 function fetchWithTimeout(url, options, timeout = 5000){
@@ -41,6 +42,7 @@ function ambilScanTerbaru(){
                 currentUID = scan.uid;
 
                 console.log("Scan baru:", scan);
+                console.log("UID Aktif:", currentUID); // 🔥 debug
 
                 ambilDataAnak(scan.uid);
                 updateTinggi(scan.tinggi);
@@ -122,7 +124,7 @@ function updateTinggi(tinggi){
 // ================= POLLING =================
 setInterval(() => { 
     ambilScanTerbaru(); 
-}, 4000); // lebih aman
+}, 4000);
 
 // ================= NAV =================
 function goTodata(){ 
@@ -132,69 +134,102 @@ function goTodata(){
 // ================= BUTTON =================
 function tekanA(el){
     el.classList.add("active");
-    kirimKeServer(1, 0);
+
+    setTimeout(() => {
+        kirimKeServer(1, 0);
+    }, 150);
 }
 
 function lepasA(el){
     el.classList.remove("active");
-    kirimKeServer(0, 0);
 }
 
 function tekanB(el){
     el.classList.add("active");
-    kirimKeServer(0, 1);
+
+    setTimeout(() => {
+        kirimKeServer(0, 1);
+    }, 150);
 }
 
 function lepasB(el){
     el.classList.remove("active");
-    kirimKeServer(0, 0);
 }
 
 // ================= KIRIM KE SUPABASE =================
 async function kirimKeServer(a, b){
 
-    // anti spam state
-    if(a === lastA && b === lastB) return;
-    lastA = a;
-    lastB = b;
+    if(isSending) return;
 
-    // debounce waktu
+    if(a === lastA && b === lastB) return;
+
     let now = Date.now();
-    if(now - lastSendTime < 1000) return;
+    if(now - lastSendTime < 300) return;
     lastSendTime = now;
 
     let nama = document.querySelector(".profile b").innerText;
     let tinggiText = document.getElementById("tinggi").innerText;
     let tinggi = parseInt(tinggiText.replace(/[^\d]/g, "")) || 0;
 
-    if(nama === "Menunggu scan..." || tinggi <= 0 || !currentUID){
-        console.log("Data belum siap");
+    // 🔥 DEBUG TAMBAHAN
+    console.log("DEBUG DATA:", {
+        uid: currentUID,
+        nama: nama,
+        tinggi: tinggi
+    });
+
+    if(!currentUID){
+        console.log("❌ UID NULL (belum scan)");
+        return;
+    }
+
+    if(nama === "Menunggu scan..." || tinggi <= 0){
+        console.log("❌ Data belum siap");
         return;
     }
 
     let payload = {
-        uid_anak: currentUID,
-        nama: nama,
-        tinggi: tinggi,
-        tombol_a: a,
-        tombol_b: b
+        uid_anak: String(currentUID),
+        nama: String(nama),
+        tinggi: parseInt(tinggi),
+        tombol_a: parseInt(a),
+        tombol_b: parseInt(b)
     };
 
+    console.log("🚀 Kirim:", payload);
+
     try{
-        await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/history_gizi`, {
+        isSending = true;
+
+        let res = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/history_gizi`, {
             method: "POST",
             headers: {
                 "apikey": SUPABASE_KEY,
                 "Authorization": "Bearer " + SUPABASE_KEY,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Prefer": "return=representation"
             },
-            body: JSON.stringify([payload])
+            body: JSON.stringify(payload)
         });
 
-        console.log("Kirim:", payload);
+        // 🔥 AMBIL FULL RESPONSE
+        let text = await res.text();
+        console.log("🔥 RESPONSE SUPABASE:", text);
+
+        if(!res.ok){
+            console.error("❌ GAGAL MASUK DB:", text);
+            return;
+        }
+
+        console.log("✅ BERHASIL MASUK DB");
+
+        lastA = a;
+        lastB = b;
 
     } catch(err){
-        console.error("Error kirim:", err);
+        console.error("❌ ERROR FETCH:", err);
+    } finally {
+        isSending = false;
     }
 }
 
