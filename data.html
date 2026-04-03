@@ -255,14 +255,14 @@ document.getElementById("search").addEventListener("keyup", function(){
     let keyword = this.value.toLowerCase();
 
     let filtered = window.historyData.filter(d=>{
-        const nama = d.anak?.nama?.toLowerCase() || '';
-        const tgl = d.anak?.tanggal_lahir?.toLowerCase() || '';
+        const nama = (d.anak?.nama || '').toString().toLowerCase();
+        const tgl = (d.anak?.tanggal_lahir || '').toString(); // jangan .toLowerCase karena tanggal
         const umur = d.anak?.tanggal_lahir ? hitungUmur(d.anak.tanggal_lahir).toString() : '';
+        const tinggi = (d.tinggi || '').toString();
 
-        return nama.includes(keyword) || tgl.includes(keyword) || ortu.includes(keyword) || umur.includes(keyword);
+        return nama.includes(keyword) || tgl.includes(keyword) || umur.includes(keyword) || tinggi.includes(keyword);
     });
 
-    // tampilkan maksimal 20 hasil search
     renderTable(filtered.slice(0, 20));
 });
 
